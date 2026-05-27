@@ -1,294 +1,275 @@
 'use client';
 
-import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
-import { useRef, useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 const products = [
-  { 
-    id: "01", 
-    name: "Sandalwood", 
-    subtitle: "Sacred Mysore Santalum", 
-    desc: "A timeless masterpiece extracted from mature heartwood. Its creamy, balsamic resonance creates a foundation of profound stillness.", 
-    meta: { family: "Woody", origin: "Mysore, India", rarity: "Premium" },
-    color: "#2c1810", 
-    bg: "#C68252",
-    accent: "#FFD700",
-    img: "/framers/ezgif-frame-001.jpg" 
-  },
-  { 
-    id: "02", 
-    name: "Jasmine", 
-    subtitle: "Absolute Sambac", 
-    desc: "Hand-harvested at the stroke of midnight. This euphoric absolute captures the intoxicating floral soul of the night.", 
-    meta: { family: "Floral", origin: "Madurai, India", rarity: "Exotic" },
-    color: "#1a1a1a", 
-    bg: "#D4B484",
-    accent: "#ffffff",
-    img: "/framers/ezgif-frame-010.jpg" 
-  },
-  { 
-    id: "03", 
-    name: "Lavender", 
-    subtitle: "Kashmiri High Altitude", 
-    desc: "Distilled from blooms grown 7,000ft above sea level. Crisp, medicinal, and ethereal—the pure scent of Himalayan air.", 
-    meta: { family: "Herbal", origin: "Kashmir, India", rarity: "Ultra-Rare" },
-    color: "#1a1b2c", 
-    bg: "#A8B6CC",
-    accent: "#667eea",
-    img: "/framers/ezgif-frame-020.jpg" 
-  },
-  { 
-    id: "04", 
-    name: "Rose", 
-    subtitle: "Damascena Heart", 
-    desc: "The queen of oils. Five tons of petals condensed into a single litre of pure frequency, opening the vibration of love.", 
-    meta: { family: "Floral", origin: "Kannauj, India", rarity: "Supreme" },
-    color: "#2c1014", 
-    bg: "#E8C2B8",
-    accent: "#ff3e3e",
-    img: "/framers/ezgif-frame-030.jpg" 
-  },
+  { id: "01", name: "Ethiopian Yirgacheffe", tag: "Light Roast", price: "₹450", desc: "Bright and floral with notes of jasmine, bergamot, and blueberry. A delicate cup that dances on the palate.", origin: "Yirgacheffe", img: "https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&q=80&w=1200" },
+  { id: "02", name: "Colombian Supremo", tag: "Medium Roast", price: "₹380", desc: "A perfectly balanced cup with notes of chocolate, caramel, and a hint of sweet orange.", origin: "Antioquia", img: "https://images.unsplash.com/photo-1611162458324-aae1eb4129a4?auto=format&fit=crop&q=80&w=1200" },
+  { id: "03", name: "Sumatra Mandheling", tag: "Dark Roast", price: "₹520", desc: "Earthy and full-bodied with a syrupy sweet finish and bold notes of dark chocolate.", origin: "North Sumatra", img: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=1200" },
+  { id: "04", name: "House Espresso", tag: "Signature Roast", price: "₹340", desc: "Our signature blend designed for the perfect crema and a rich, bold flavor profile.", origin: "Global Blend", img: "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&q=80&w=1200" },
+  { id: "05", name: "Guatemala Antigua", tag: "Medium-Dark", price: "₹420", desc: "Complex and spicy with a velvety body, featuring distinct notes of cocoa and subtle smoke.", origin: "Antigua", img: "https://images.unsplash.com/photo-1587734195503-904fca47e0e9?auto=format&fit=crop&q=80&w=1200" },
+  { id: "06", name: "Costa Rica Tarrazu", tag: "Light-Medium", price: "₹480", desc: "Vibrantly clean with a crisp acidity. Notes of honey, citrus, and a smooth, sweet finish.", origin: "Tarrazu", img: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&q=80&w=1200" },
 ];
 
-export default function ProductShowcase() {
-  const containerRef = useRef<HTMLDivElement>(null);
+export default function ProductShowcase({ content, dbMenuItems }: { content?: Record<string, string>, dbMenuItems?: any[] }) {
   const [isMounted, setIsMounted] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(0); 
+  const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end']
-  });
+  const dataToUse = dbMenuItems && dbMenuItems.length > 0 ? dbMenuItems : products;
+
+  const dynamicProducts = dataToUse.map((p, idx) => ({
+    ...p,
+    id: p.id || String(idx + 1).padStart(2, '0'),
+    img: p.imageUrl || p.img || content?.[`product_${idx + 1}`] 
+  }));
+
+  // Pagination logic
+  const itemsPerPage = 4;
+  const totalPages = Math.ceil(dynamicProducts.length / itemsPerPage);
+  
+  const currentProducts = dynamicProducts.slice(
+    currentPage * itemsPerPage, 
+    (currentPage + 1) * itemsPerPage
+  );
+
+  const handleNextPage = () => {
+     setCurrentPage((prev) => (prev + 1) % totalPages);
+     setHoveredIndex(0);
+  };
+
+  const handlePrevPage = () => {
+     setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
+     setHoveredIndex(0);
+  };
+
+  if (!isMounted) return <section className="min-h-screen bg-[#080605]" />;
 
   return (
-    <section ref={containerRef} className="relative bg-[#050505] text-[#C6A87C]">
-      
-      {/* Introduction Section - High-Fidelity Atmosphere */}
-      <div className="h-screen flex items-center justify-center sticky top-0 z-0 overflow-hidden bg-[#050505]">
+    <section className="bg-[#080605] py-32 md:py-48 relative overflow-hidden">
+       {/* Background decorative elements */}
+       <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-[#C6A87C]/5 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+       
+       <div className="max-w-[2000px] mx-auto px-4 md:px-8 relative z-10">
           
-          {/* Dynamic Liquid Atmosphere */}
-          <div className="absolute inset-0">
-             <motion.div 
-               style={{ 
-                 opacity: useTransform(scrollYProgress, [0, 0.2, 0.5], [0.4, 0.2, 0]),
-                 scale: useTransform(scrollYProgress, [0, 1], [1, 1.5])
-               }}
-               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120vw] h-[120vh] bg-gradient-to-tr from-[#C6A87C]/10 via-transparent to-[#8B5E3C]/10 blur-[120px] rounded-full animate-spin-slow" 
-             />
-             <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')] opacity-20 pointer-events-none" />
-             
-             {/* Floating Dust Particles */}
-             {isMounted && (
-                <div className="absolute inset-0 opacity-30">
-                  {[...Array(15)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute w-[2px] h-[2px] bg-[#C6A87C]/40 rounded-full"
-                      animate={{ 
-                        y: ['-10vh', '110vh'],
-                        x: [`${Math.random() * 100}vw`, `${Math.random() * 100}vw`],
-                        opacity: [0, 1, 0]
-                      }}
-                      transition={{ 
-                        duration: Math.random() * 10 + 10,
-                        repeat: Infinity,
-                        ease: "linear",
-                        delay: Math.random() * 5
-                      }}
-                    />
-                  ))}
-                </div>
-             )}
-          </div>
-          
-          <div className="text-center relative z-10 space-y-12">
-             <div className="overflow-hidden">
-               <motion.span
-                 initial={{ y: "100%" }}
-                 whileInView={{ y: 0 }}
-                 transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                 className="block text-[#C6A87C] text-xs font-bold tracking-[1.2em] uppercase opacity-80"
-               >
-                 Archival Selection
-               </motion.span>
+          {/* Header */}
+          <div className="mb-16 md:mb-24 flex flex-col md:flex-row justify-between items-end gap-8 px-4 md:px-12">
+             <div className="max-w-3xl">
+                 <motion.span 
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="text-[#C6A87C] tracking-[0.5em] text-[10px] font-bold uppercase mb-6 block font-sans"
+                 >
+                    {content?.menu_tag || "The Collection"}
+                 </motion.span>
+                 <motion.h2 
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                    className="text-5xl md:text-7xl lg:text-[8rem] font-serif text-white tracking-tighter leading-[1.05]"
+                 >
+                    {content?.menu_title || "Signature"} <br/><span className="italic text-[#C6A87C] font-serif font-medium">{content?.menu_highlight || "Roasts."}</span>
+                 </motion.h2 >
              </div>
-
-             <motion.h2 
-               initial={{ opacity: 0, scale: 0.9, filter: 'blur(30px)' }}
-               whileInView={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-               transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-               className="text-[14vw] font-serif leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-[#f3e3ad] via-[#C6A87C] to-[#8B5E3C] drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)] select-none italic"
+             <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.3 }}
+                className="text-white/40 max-w-md text-base font-light pb-4 md:pb-6 font-sans leading-relaxed"
              >
-               ARCHIVE
-             </motion.h2>
-             
-             <motion.div 
-               initial={{ opacity: 0 }}
-               whileInView={{ opacity: 1 }}
-               transition={{ delay: 1.2, duration: 1.5 }}
-               className="flex flex-col items-center gap-8"
-             >
-               <div className="flex items-center gap-12">
-                 <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-[#C6A87C]/60" />
-                 <p className="text-sm md:text-base font-serif italic text-white/50 tracking-[0.6em] uppercase">
-                    The Sacred Library
-                 </p>
-                 <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-[#C6A87C]/60" />
-               </div>
-               
-               {/* Vertical Progress Scroll Indicator */}
-               <motion.div 
-                 className="relative flex flex-col items-center gap-4"
-               >
-                  <motion.div 
-                    style={{ height: useTransform(scrollYProgress, [0, 0.2], [0, 120]) }}
-                    className="w-[1px] bg-gradient-to-b from-[#C6A87C] to-transparent" 
-                  />
-                  <span className="text-[8px] tracking-[0.5em] text-[#C6A87C]/40 uppercase rotate-90 origin-left mt-10">Descent</span>
-               </motion.div>
-             </motion.div>
+                {content?.menu_desc || "A curated selection of our finest beans. Hover to explore the unique profile of each exquisite roast."}
+             </motion.p>
           </div>
-      </div>
 
-      <div className="relative z-10 pb-[20vh] px-4 md:px-0">
-         {products.map((product, i) => {
-           // Calculate range for each card based on index
-           const targetScale = 1 - ( (products.length - 1 - i) * 0.05 );
-           return (
-             <Card 
-               key={i} 
-               i={i} 
-               {...product} 
-               progress={scrollYProgress} 
-               targetScale={targetScale} 
-             />
-           );
-         })}
-      </div>
+          {/* Accordion Container (Desktop) */}
+          <div className="hidden md:flex h-[75vh] w-full gap-4 px-8">
+             <AnimatePresence mode="wait">
+                {currentProducts.map((p, i) => {
+                   const isActive = hoveredIndex === i;
+                   
+                   return (
+                      <motion.div 
+                         key={p.id}
+                         initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                         animate={{ opacity: 1, scale: 1, y: 0 }}
+                         exit={{ opacity: 0, scale: 0.95, y: -30 }}
+                         transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                         onMouseEnter={() => setHoveredIndex(i)}
+                         onClick={() => setHoveredIndex(i)}
+                         className={`relative overflow-hidden rounded-[2.5rem] cursor-pointer transition-all duration-[1.2s] ease-[0.16,1,0.3,1] border ${
+                            isActive ? 'flex-[5] shadow-2xl border-white/[0.08] bg-[#0c0a09]' : 'flex-1 opacity-60 hover:opacity-90 border-white/[0.03] bg-[#0c0a09]/50'
+                         }`}
+                      >
+                         {/* Background Image */}
+                         <div className="absolute inset-0 bg-[#0c0a09]">
+                            <img 
+                               src={p.img} 
+                               alt={p.name} 
+                               className={`w-full h-full object-cover transition-all duration-[1.5s] ease-[0.16,1,0.3,1] origin-center opacity-100 ${
+                                  isActive ? 'scale-100 grayscale-0 blur-0' : 'scale-125 grayscale blur-[2px]'
+                               }`} 
+                            />
+                         </div>
+
+                         {/* Gradient Overlay */}
+                         <div className={`absolute inset-0 bg-gradient-to-t transition-opacity duration-1000 pointer-events-none ${
+                            isActive 
+                               ? 'from-black via-black/85 to-black/10 opacity-100' 
+                               : 'from-black/90 via-black/60 to-transparent opacity-90'
+                         }`} />
+
+                         {/* Content Container */}
+                         <div className="absolute inset-0 p-10 flex flex-col justify-between pointer-events-none">
+                            
+                            {/* Top: Number & Tag */}
+                            <div className="flex justify-between items-start">
+                               <span className={`font-serif text-3xl italic transition-colors duration-700 drop-shadow-md ${isActive ? 'text-[#C6A87C]' : 'text-white/30'}`}>
+                                  {String(i + 1 + (currentPage * itemsPerPage)).padStart(2, '0')}
+                                </span>
+                               <div className={`transition-all duration-700 block ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+                                  <span className="px-4 py-1.5 rounded-full border border-white/[0.08] backdrop-blur-md text-white/80 text-[9px] uppercase tracking-[0.2em] font-semibold bg-black/40 font-sans">
+                                     {p.tag}
+                                  </span>
+                               </div>
+                            </div>
+
+                            {/* Bottom: Details */}
+                            <div className="flex flex-col justify-end w-full h-full relative">
+                               
+                               {/* Vertical Text when collapsed */}
+                               <div className={`flex absolute inset-0 pb-12 items-end justify-center transition-all duration-[1s] ${
+                                  isActive ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100 delay-300'
+                               }`}>
+                                  <h3 className="text-2xl lg:text-3xl font-serif text-white/60 tracking-[0.15em] whitespace-nowrap drop-shadow-xl uppercase" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                                     {p.name}
+                                  </h3>
+                               </div>
+
+                               {/* Full Details when expanded */}
+                               <div className={`transition-all duration-[1s] ease-[0.16,1,0.3,1] w-[450px] relative z-10 ${
+                                  isActive ? 'opacity-100 translate-y-0 delay-200' : 'opacity-0 translate-y-24 pointer-events-none absolute bottom-0'
+                               }`}>
+                                  <p className="text-[#C6A87C] text-[10px] font-sans tracking-[0.3em] uppercase mb-3 drop-shadow-sm font-semibold">{p.origin}</p>
+                                  <h3 className="text-3xl md:text-5xl lg:text-5xl font-serif text-white leading-tight mb-5 drop-shadow-2xl font-medium">
+                                     {p.name}
+                                  </h3>
+                                  <p className="text-white/50 font-sans font-light text-sm leading-relaxed mb-6">
+                                     {p.desc}
+                                  </p>
+                                  <div className="flex flex-row items-center gap-10 font-sans">
+                                     <span className="text-[#C6A87C] text-3xl font-light font-serif">{p.price}</span>
+                                  </div>
+                               </div>
+                               
+                            </div>
+                         </div>
+                      </motion.div>
+                   );
+                })}
+             </AnimatePresence>
+          </div>
+
+          {/* Horizontal Snap Carousel (Mobile Only) */}
+          <div className="flex md:hidden w-full overflow-x-auto snap-x snap-mandatory gap-4 px-4 pb-8 hide-scrollbar">
+             {currentProducts.map((p, i) => (
+                <div 
+                   key={p.id}
+                   className="min-w-[85vw] h-[65vh] snap-center relative overflow-hidden rounded-[2rem] border border-white/[0.08] shadow-2xl bg-[#0c0a09] flex-shrink-0"
+                >
+                   {/* Background Image */}
+                   <div className="absolute inset-0">
+                      <img 
+                         src={p.img} 
+                         alt={p.name} 
+                         className="w-full h-full object-cover opacity-90"
+                      />
+                   </div>
+
+                   {/* Gradient Overlay */}
+                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/85 to-black/10 pointer-events-none" />
+
+                   {/* Content Container */}
+                   <div className="absolute inset-0 p-6 flex flex-col justify-between pointer-events-none">
+                      
+                      {/* Top: Number & Tag */}
+                      <div className="flex justify-between items-start">
+                         <span className="font-serif text-2xl italic text-[#C6A87C] drop-shadow-md">
+                            {String(i + 1 + (currentPage * itemsPerPage)).padStart(2, '0')}
+                          </span>
+                         <span className="px-3 py-1.5 rounded-full border border-white/[0.08] backdrop-blur-md text-white/90 text-[8px] uppercase tracking-[0.2em] font-semibold bg-black/50 font-sans">
+                            {p.tag}
+                         </span>
+                      </div>
+
+                      {/* Bottom: Details */}
+                      <div className="flex flex-col justify-end w-full relative z-10">
+                         <p className="text-[#C6A87C] text-[9px] font-sans tracking-[0.3em] uppercase mb-2 drop-shadow-sm font-semibold">{p.origin}</p>
+                         <h3 className="text-3xl font-serif text-white leading-tight mb-4 drop-shadow-2xl font-medium">
+                            {p.name}
+                         </h3>
+                         <p className="text-white/60 font-sans font-light text-xs leading-relaxed mb-5 line-clamp-3">
+                            {p.desc}
+                         </p>
+                         <div className="flex items-center font-sans">
+                            <span className="text-[#C6A87C] text-2xl font-light font-serif">{p.price}</span>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             ))}
+          </div>
+
+          {/* Scalable Navigation Controls */}
+          {totalPages > 1 && (
+             <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="flex items-center justify-between px-6 md:px-12 mt-12 md:mt-16 font-sans"
+             >
+                {/* Arrows */}
+                <div className="flex items-center gap-4">
+                   <button 
+                      onClick={handlePrevPage} 
+                      className="w-10 h-10 rounded-full border border-white/[0.08] flex items-center justify-center text-white/60 hover:text-white hover:border-[#C6A87C] hover:bg-white/[0.02] transition-all group backdrop-blur-md"
+                      aria-label="Previous Products"
+                   >
+                      <span className="text-xs group-hover:-translate-x-0.5 transition-transform">←</span>
+                   </button>
+                   <button 
+                      onClick={handleNextPage} 
+                      className="w-10 h-10 rounded-full border border-white/[0.08] flex items-center justify-center text-white/60 hover:text-white hover:border-[#C6A87C] hover:bg-white/[0.02] transition-all group backdrop-blur-md"
+                      aria-label="Next Products"
+                   >
+                      <span className="text-xs group-hover:translate-x-0.5 transition-transform">→</span>
+                   </button>
+                </div>
+
+                {/* Dots Pagination */}
+                <div className="flex gap-2">
+                   {Array.from({length: totalPages}).map((_, idx) => (
+                      <button 
+                         key={idx} 
+                         onClick={() => { setCurrentPage(idx); setHoveredIndex(0); }}
+                         className={`h-[3px] rounded-full transition-all duration-500 ease-[0.16,1,0.3,1] ${
+                            idx === currentPage ? 'w-8 bg-[#C6A87C]' : 'w-3 bg-white/10 hover:bg-white/20'
+                         }`}
+                         aria-label={`Go to page ${idx + 1}`}
+                      />
+                   ))}
+                </div>
+             </motion.div>
+          )}
+
+       </div>
     </section>
   );
 }
-
-const Card = ({ i, name, subtitle, desc, meta, color, bg, img, progress, targetScale }: any) => {
-  const container = useRef(null);
-  
-  // Refined Scroll Perspective
-  const { scrollYProgress } = useScroll({
-    target: container,
-    offset: ['start end', 'start start']
-  });
-
-  // Entry Animations
-  const opacity = useTransform(scrollYProgress, [0, 0.4], [0, 1]);
-  const y = useTransform(scrollYProgress, [0, 0.4], [100, 0]);
-  
-  // Stacking Animations (using the parent progress)
-  const stackStart = i * 0.15; // Adjusted start points for tighter stacking
-  const cardScale = useTransform(progress, [stackStart, 1], [1, targetScale]);
-  const cardBlur = useTransform(progress, [stackStart + 0.1, 1], [0, 2]);
-
-  return (
-    <div ref={container} className="h-[120vh] flex items-center justify-center sticky top-0">
-      <motion.div 
-        style={{ 
-          scale: cardScale, 
-          opacity,
-          y,
-          filter: `blur(${cardBlur}px)`,
-          top: `calc(10vh + ${i * 20}px)` 
-        }} 
-        className="relative flex flex-col md:flex-row w-[90vw] h-[70vh] rounded-[3rem] overflow-hidden shadow-[0_60px_120px_rgba(0,0,0,0.5)] origin-top border border-white/10 group"
-      >
-        {/* Left Side: Text Details */}
-        <motion.div 
-          className="w-full md:w-1/2 p-12 md:p-20 flex flex-col justify-between relative z-10 transition-all duration-700" 
-          style={{ 
-            backgroundColor: bg, 
-            color: color
-          }}
-        >
-           <div className="space-y-8">
-              <div className="flex items-center gap-4">
-                <span className="text-xs font-bold tracking-[0.5em] uppercase opacity-50">
-                  Origin 00{i + 1}
-                </span>
-                <div className="flex-1 h-[0.5px] bg-current opacity-10" />
-              </div>
-
-              <div className="space-y-3">
-                <h3 className="text-7xl md:text-9xl font-serif leading-none tracking-tighter">
-                  {name}
-                </h3>
-                <p className="text-sm md:text-base font-serif italic opacity-60 tracking-[0.3em] uppercase">
-                  {subtitle}
-                </p>
-              </div>
-
-              {/* Product Metadata Grid */}
-              <div className="grid grid-cols-3 gap-6 py-10 border-y border-current/10">
-                <div className="space-y-1">
-                  <p className="text-[10px] uppercase tracking-[0.3em] opacity-40">Family</p>
-                  <p className="text-xs font-bold tracking-widest uppercase">{meta.family}</p>
-                </div>
-                <div className="space-y-1 border-x border-current/10 px-6">
-                  <p className="text-[10px] uppercase tracking-[0.3em] opacity-40">Origin</p>
-                  <p className="text-xs font-bold tracking-widest uppercase">{meta.origin}</p>
-                </div>
-                <div className="space-y-1 pl-6">
-                  <p className="text-[10px] uppercase tracking-[0.3em] opacity-40">Rarity</p>
-                  <p className="text-xs font-bold tracking-widest uppercase">{meta.rarity}</p>
-                </div>
-              </div>
-           </div>
-
-           <div className="space-y-12">
-             <p className="text-xl md:text-2xl font-light opacity-100 leading-relaxed max-w-sm italic">
-               "{desc}"
-             </p>
-             
-                <div className="relative inline-block group/btn">
-                  <div className="absolute -inset-4 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-1000 blur-2xl" style={{ backgroundColor: color, opacity: 0.15 }} />
-                  
-                  <button className="relative px-12 py-5 border-[1.5px] border-current rounded-full uppercase text-xs font-bold tracking-[0.4em] overflow-hidden transition-all duration-500 group-hover/btn:scale-105 group-hover/btn:shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-                    <div className="absolute inset-0 bg-current transform -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-700 ease-[0.16, 1, 0.3, 1]" />
-                    
-                    {/* Shimmer Effect */}
-                    <motion.div 
-                      animate={{ x: ['-100%', '200%'] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
-                      className="absolute top-0 bottom-0 w-12 bg-white/30 -skew-x-12 blur-xl pointer-events-none"
-                    />
-
-                    <span className="relative z-10 flex items-center gap-6 transition-colors duration-500" style={{ color: bg }}>
-                      <span className="group-hover/btn:text-white transition-colors duration-500">Discover Essence</span>
-                      <span className="text-xl group-hover/btn:translate-x-3 transition-transform duration-500 group-hover/btn:text-white">→</span>
-                    </span>
-                  </button>
-              </div>
-           </div>
-            
-           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] opacity-10 mix-blend-overlay pointer-events-none" />
-        </motion.div>
-
-        {/* Right Side: Enhanced Image Parallax */}
-        <div className="w-full md:w-1/2 relative overflow-hidden bg-[#050505]">
-           <motion.div 
-             className="w-full h-full"
-             style={{ 
-               scale: useTransform(scrollYProgress, [0, 1], [1.3, 1]),
-               x: useTransform(scrollYProgress, [0, 1], ["2%", "-2%"])
-             }}
-           >
-             <img src={img} className="w-full h-full object-cover" />
-           </motion.div>
-           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
-           <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
-        </div>
-
-      </motion.div>
-    </div>
-  );
-};

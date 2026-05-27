@@ -1,49 +1,140 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
-export default function Navbar() {
-  const navItems = ['Essence', 'Philosophy', 'Rituals'];
+export default function Navbar({ content }: { content?: Record<string, string> }) {
+  const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  const links = [
+    { name: content?.nav_home || 'Home', path: content?.nav_home_link || '/' },
+    { name: content?.nav_menu || 'Menu', path: content?.nav_menu_link || '/roasts' },
+    { name: content?.nav_story || 'Our Story', path: content?.nav_story_link || '/story' },
+    { name: content?.nav_gallery || 'Gallery', path: content?.nav_gallery_link || '/gallery' },
+    { name: content?.nav_locations || 'Locations', path: content?.nav_locations_link || '/cafe' },
+  ];
 
   return (
     <motion.nav 
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed top-6 left-0 right-0 z-50 flex justify-center pointer-events-none"
+       initial={{ y: -100, opacity: 0 }}
+       animate={{ y: 0, opacity: 1 }}
+       transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+       className="fixed top-6 left-0 right-0 z-50 flex flex-col items-center pointer-events-none px-4"
     >
-      <div className="pointer-events-auto relative bg-[#050505]/80 backdrop-blur-3xl border border-[#C6A87C]/20 rounded-full px-12 py-3 flex items-center gap-16 shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/5">
-        
-        {/* Brand */}
-        <a href="/" className="text-lg font-bold tracking-[0.2em] text-white uppercase font-serif hover:text-[#C6A87C] transition-colors">
-          Pavitram
-        </a>
-        
-        {/* Links */}
-        <div className="hidden md:flex items-center gap-10 text-[10px] font-bold tracking-[0.25em] uppercase text-white/70">
-          {navItems.map((item, i) => (
-            <motion.a 
-              key={item}
-              href={`/${item.toLowerCase()}`} 
-              className="hover:text-[#C6A87C] transition-colors relative group"
-              whileHover={{ scale: 1.05 }}
-            >
-              <span className="relative z-10">{item}</span>
-              <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-1 w-1 bg-[#C6A87C] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_15px_#C6A87C]" />
-            </motion.a>
-          ))}
-        </div>
+       {/* Main Navbar Pill */}
+       <div className="pointer-events-auto bg-black/70 backdrop-blur-xl border border-white/[0.08] p-2 md:p-2.5 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.9)] ring-1 ring-white/5 relative overflow-hidden group">
+          {/* Subtle reflection overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
+          
+          <div className="flex items-center justify-between w-full relative z-10">
+             {/* Logo */}
+             <Link href="/" className="pl-3 pr-5 md:pr-6 md:border-r md:border-white/5 flex items-center shrink-0">
+                <Image 
+                   src={content?.nav_logo || "/hodl_and_sip_print_logo.svg"} 
+                   width={32} 
+                   height={32} 
+                   alt="Hodl & Sip Logo" 
+                   className="hover:scale-105 transition-transform duration-500 opacity-90 hover:opacity-100"
+                />
+             </Link>
 
-        {/* CTA - Shiny Button */}
-        <motion.button 
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="relative overflow-hidden bg-[#C6A87C] text-black text-[10px] font-bold uppercase tracking-[0.2em] px-8 py-2.5 rounded-full hover:bg-[#d4b484] transition-colors group shadow-[0_0_30px_rgba(198,168,124,0.3)]"
-        >
-          <span className="relative z-10">Shop Now</span>
-          <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent z-0" />
-        </motion.button>
-      </div>
+             {/* Hamburger Button (Mobile Only) */}
+             <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 text-[#C6A87C] hover:text-white transition-colors focus:outline-none pr-3"
+             >
+                <div className="w-5 flex flex-col gap-1.5 items-end">
+                   <motion.div 
+                      animate={isMobileMenuOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
+                      className="w-full h-[1.5px] bg-current origin-center transition-all duration-300"
+                   />
+                   <motion.div 
+                      animate={isMobileMenuOpen ? { opacity: 0, x: 10 } : { opacity: 1, x: 0 }}
+                      className="w-4 h-[1.5px] bg-current transition-all duration-300"
+                   />
+                   <motion.div 
+                      animate={isMobileMenuOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
+                      className="w-full h-[1.5px] bg-current origin-center transition-all duration-300"
+                   />
+                </div>
+             </button>
+
+             {/* Desktop Navigation Links */}
+             <div className="hidden md:flex items-center justify-between md:gap-1.5 px-1 md:px-3 font-sans shrink-0">
+                {links.map((link) => {
+                   const isActive = pathname === link.path;
+                   return (
+                      <Link key={link.path} href={link.path} className="group relative">
+                         <motion.div 
+                            whileHover={{ y: -1 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`px-3.5 md:px-5 py-2 md:py-2.5 rounded-full transition-all duration-300 flex items-center justify-center ${isActive ? 'bg-white/[0.06] text-[#C6A87C]' : 'hover:bg-white/[0.03] text-white/50 group-hover:text-white/90'}`}
+                         >
+                            <span className="text-[9px] md:text-[10px] font-semibold tracking-[0.22em] uppercase transition-colors whitespace-nowrap">
+                               {link.name}
+                            </span>
+                            {isActive && (
+                               <motion.div 
+                                  layoutId="activeDotTop" 
+                                  className="absolute bottom-1 w-6 h-[2px] rounded-full bg-gradient-to-r from-[#C6A87C] to-[#EAE3DB] shadow-[0_0_12px_rgba(198,168,124,0.8)]" 
+                               />
+                            )}
+                         </motion.div>
+                      </Link>
+                   )
+                })}
+             </div>
+          </div>
+       </div>
+
+       {/* Mobile Navigation Dropdown - Detached from pill for performance */}
+       <AnimatePresence>
+          {isMobileMenuOpen && (
+             <motion.div 
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="md:hidden mt-3 pointer-events-auto w-full max-w-sm"
+             >
+                <div className="bg-black/90 backdrop-blur-xl border border-white/[0.08] rounded-3xl p-4 shadow-2xl">
+                   <div className="flex flex-col gap-1 font-sans">
+                      {links.map((link, i) => {
+                         const isActive = pathname === link.path;
+                         return (
+                            <motion.div
+                               key={link.path}
+                               initial={{ opacity: 0, x: -10 }}
+                               animate={{ opacity: 1, x: 0 }}
+                               transition={{ delay: i * 0.05 + 0.1, duration: 0.3 }}
+                            >
+                               <Link href={link.path} className="block w-full">
+                                  <div className={`px-5 py-3.5 rounded-2xl transition-all duration-300 flex items-center ${isActive ? 'bg-white/[0.06] text-[#C6A87C]' : 'hover:bg-white/[0.03] text-white/50 hover:text-white/90'}`}>
+                                     <span className="text-[11px] font-bold tracking-[0.2em] uppercase transition-colors">
+                                        {link.name}
+                                     </span>
+                                     {isActive && (
+                                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#C6A87C] shadow-[0_0_10px_rgba(198,168,124,0.8)]" />
+                                     )}
+                                  </div>
+                               </Link>
+                            </motion.div>
+                         )
+                      })}
+                   </div>
+                </div>
+             </motion.div>
+          )}
+       </AnimatePresence>
     </motion.nav>
   );
 }

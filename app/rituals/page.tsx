@@ -7,20 +7,20 @@ const rituals = [
   {
     title: "Dawn Awakening",
     time: "06:00 AM",
-    description: "Greet the sun with Jasmine essence. A single drop on the solar plexus to ignite creative fire.",
-    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=1000"
+    description: "Greet the sun with a fresh pour-over. The bright acidity and floral notes of a light roast to ignite creative fire.",
+    img: "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=1000"
   },
   {
     title: "The Midday Stillness",
     time: "12:00 PM",
-    description: "In the heat of the day, cool the spirit with Sandalwood. Apply to temples for laser-like focus.",
-    img: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=1000"
+    description: "In the heat of the day, cool the spirit with a cold brew. A perfectly balanced cup for laser-like focus.",
+    img: "https://images.unsplash.com/photo-1461023058943-07cb1ce8e1dc?auto=format&fit=crop&q=80&w=1000"
   },
   {
-    title: "Vesper Prayer",
-    time: "06:00 PM",
-    description: "As light fades, Rose oil opens the heart. A ritual of gratitude for the day's lessons.",
-    img: "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&q=80&w=1000"
+    title: "Vesper Pairing",
+    time: "04:00 PM",
+    description: "As light fades, a rich espresso opens the heart. A ritual of gratitude for the day's lessons.",
+    img: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=1000"
   }
 ];
 
@@ -49,7 +49,7 @@ export default function RitualsPage() {
         >
           <h1 className="text-7xl md:text-9xl font-serif mb-6 tracking-tighter">Daily Rituals</h1>
           <p className="text-xl md:text-2xl font-light opacity-60 max-w-2xl mx-auto italic">
-            "Transform the ordinary into the sacred through the geometry of scent."
+            "Transform the ordinary into the sacred through the geometry of brewing."
           </p>
         </motion.div>
       </section>
@@ -98,14 +98,14 @@ export default function RitualsPage() {
       </section>
 
       {/* Philosophy Callout */}
-      <section className="bg-[#050505] py-48 text-center px-4">
+      <section className="bg-[#080605] py-48 text-center px-4">
          <motion.div
            initial={{ opacity: 0 }}
            whileInView={{ opacity: 1 }}
            className="max-w-4xl mx-auto"
          >
            <h2 className="text-4xl md:text-5xl font-serif mb-12 leading-tight">
-             Scent is the only sense that bypasses the logical mind and speaks directly to the soul.
+             Taste is the only sense that bypasses the logical mind and speaks directly to the soul.
            </h2>
            <div className="w-[1px] h-32 bg-gradient-to-b from-[#C6A87C] to-transparent mx-auto" />
          </motion.div>

@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model WebsiteContent {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  type        String   @default("IMAGE")
+  section     String   @default("Home")
+  imageUrl    String?
+  textContent String?
+  buttonLink  String?
+  updatedAt   DateTime @updatedAt
+}
+
+model MenuItem {
+  id          String   @id @default(cuid())
+  orderId     Int      @default(0)
+  name        String
+  tag         String
+  price       String
+  desc        String
+  origin      String
+  imageUrl    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GalleryImage {
+  id          String   @id @default(cuid())
+  orderId     Int      @default(0)
+  title       String
+  category    String
+  imageUrl    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

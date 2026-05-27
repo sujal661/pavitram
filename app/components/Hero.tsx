@@ -15,7 +15,7 @@ export default function Hero() {
   const y = useTransform(scrollYProgress, [0, 0.8], [0, 100]);
 
   return (
-    <section ref={containerRef} className="h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#050505]">
+    <section ref={containerRef} className="h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#080605]">
       {/* Background Ambience */}
       <div className="absolute inset-0 z-0">
          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] bg-[#C6A87C]/10 blur-[150px] rounded-full animate-pulse" />
@@ -40,7 +40,7 @@ export default function Hero() {
           transition={{ duration: 1.2, delay: 0.2, ease: "easeOut" }}
           className="text-[12vw] leading-none font-serif text-white font-bold tracking-tighter mix-blend-overlay"
         >
-          PAVITRAM
+          HODL & SIP
         </motion.h1>
 
         <motion.p
@@ -49,7 +49,7 @@ export default function Hero() {
           transition={{ duration: 1.5, delay: 0.8 }}
           className="text-white/50 text-xl md:text-2xl mt-8 font-light tracking-wide max-w-lg"
         >
-          The soul of nature, distilled into silence.
+          The soul of the bean, perfectly roasted.
         </motion.p>
         
         <motion.div 
